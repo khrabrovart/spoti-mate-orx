@@ -1,0 +1,83 @@
+use std::env;
+
+use aws_sdk_ssm::Client as SsmClient;
+use lambda_runtime::{Error, LambdaEvent};
+use serde_json::{json, Value};
+use tracing::{error, info};
+use url::Url;
+
+const SPOTIFY_AUTHORIZE_URL: &str = "https://accounts.spotify.com/authorize";
+const SPOTIFY_STATE: &str = "primary-refresh-token";
+const TELEGRAM_API_BASE: &str = "https://api.telegram.org";
+
+pub async fn handle(_event: LambdaEvent<Value>) -> Result<(), Error> {
+    let config = aws_config::load_defaults(aws_config::BehaviorVersion::latest()).await;
+    let ssm = SsmClient::new(&config);
+
+    let bot_token = get_parameter(&ssm, &env::var("TELEGRAM_BOT_TOKEN_PARAM")?).await?;
+    let chat_id = get_parameter(&ssm, &env::var("TELEGRAM_CHAT_ID_PARAM")?).await?;
+    let spotify_client_id = get_parameter(&ssm, &env::var("SPOTIFY_CLIENT_ID_PARAM")?).await?;
+    let redirect_uri = env::var("SPOTIFY_REDIRECT_URI")?;
+
+    let authorize_url = build_authorize_url(&spotify_client_id, &redirect_uri)?;
+    send_telegram_message(&bot_token, &chat_id, &authorize_url).await?;
+
+    info!("spotify authorization link sent via telegram");
+    Ok(())
+}
+
+async fn get_parameter(ssm: &SsmClient, name: &str) -> Result<String, Error> {
+    let response = ssm
+        .get_parameter()
+        .name(name)
+        .with_decryption(true)
+        .send()
+        .await?;
+
+    response
+        .parameter()
+        .and_then(|parameter| parameter.value())
+        .map(str::to_owned)
+        .ok_or_else(|| Error::from(format!("missing value for SSM parameter {name}")))
+}
+
+fn build_authorize_url(client_id: &str, redirect_uri: &str) -> Result<String, Error> {
+    let mut url = Url::parse(SPOTIFY_AUTHORIZE_URL)?;
+    url.query_pairs_mut()
+        .append_pair("client_id", client_id)
+        .append_pair("response_type", "code")
+        .append_pair("redirect_uri", redirect_uri)
+        .append_pair("state", SPOTIFY_STATE);
+
+    Ok(url.into())
+}
+
+async fn send_telegram_message(
+    bot_token: &str,
+    chat_id: &str,
+    authorize_url: &str,
+) -> Result<(), Error> {
+    let client = reqwest::Client::new();
+    let send_message_url = format!("{TELEGRAM_API_BASE}/bot{bot_token}/sendMessage");
+    let text = format!("Authorize Spotify access:\n{authorize_url}");
+
+    let response = client
+        .post(&send_message_url)
+        .json(&json!({
+            "chat_id": chat_id,
+            "text": text,
+        }))
+        .send()
+        .await?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let body = response.text().await.unwrap_or_default();
+        error!(%status, %body, "telegram sendMessage request failed");
+        return Err(Error::from(format!(
+            "telegram sendMessage request failed with status {status}"
+        )));
+    }
+
+    Ok(())
+}

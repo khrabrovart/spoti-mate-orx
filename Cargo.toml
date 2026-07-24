@@ -1,0 +1,3 @@
+[workspace]
+members = ["src/notifier", "src/callback"]
+resolver = "2"
