@@ -49,7 +49,7 @@ resource "aws_scheduler_schedule" "notifier_primary" {
   target {
     arn      = aws_lambda_function.notifier_lambda.arn
     role_arn = aws_iam_role.scheduler_role.arn
-    input    = jsonencode({ value = "primary" })
+    input    = jsonencode({ account = "primary" })
   }
 }
 
@@ -67,7 +67,7 @@ resource "aws_scheduler_schedule" "notifier_secondary" {
   target {
     arn      = aws_lambda_function.notifier_lambda.arn
     role_arn = aws_iam_role.scheduler_role.arn
-    input    = jsonencode({ value = "secondary" })
+    input    = jsonencode({ account = "secondary" })
   }
 }
 

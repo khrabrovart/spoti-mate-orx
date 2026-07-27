@@ -20,20 +20,20 @@ const SPOTIFY_SCOPES: &[&str] = &[
 const TELEGRAM_API_BASE: &str = "https://api.telegram.org";
 
 pub async fn handle(event: LambdaEvent<Value>) -> Result<(), Error> {
-    let value = event
+    let account = event
         .payload
-        .get("value")
+        .get("account")
         .and_then(Value::as_str)
-        .ok_or_else(|| Error::from("missing or invalid 'value' in event payload"))?;
+        .ok_or_else(|| Error::from("missing or invalid 'account' in event payload"))?;
 
-    info!(value, "starting notifier");
+    info!(account, "starting notifier");
 
-    let (chat_id_param, state) = match value {
+    let (chat_id_param, state) = match account {
         "primary" => ("TELEGRAM_PRIMARY_CHAT_ID_PARAM", "primary"),
         "secondary" => ("TELEGRAM_SECONDARY_CHAT_ID_PARAM", "secondary"),
         other => {
             return Err(Error::from(format!(
-                "invalid 'value' in event payload: {other}"
+                "invalid 'account' in event payload: {other}"
             )))
         }
     };
@@ -51,7 +51,7 @@ pub async fn handle(event: LambdaEvent<Value>) -> Result<(), Error> {
 
     send_telegram_message(&bot_token, &chat_id, &authorize_url).await?;
 
-    info!(value, "spotify authorization link sent via telegram");
+    info!(account, "spotify authorization link sent via telegram");
     Ok(())
 }
 
@@ -95,8 +95,8 @@ fn build_telegram_message(authorize_url: &str) -> String {
     let authorize_url = escape_html_attr(authorize_url);
 
     format!(
-        "<b>Spotify Authorization</b>\n\n\
-         Authorize the account to keep using SpotiMate\n\n\
+        "<b>Spotify Authorization</b>\n
+         Authorize the account to keep using SpotiMate, click the link below:\n\n\
          <a href=\"{authorize_url}\">Authorize Spotify</a>"
     )
 }
