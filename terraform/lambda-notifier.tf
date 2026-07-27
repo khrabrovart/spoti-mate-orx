@@ -18,8 +18,9 @@ resource "aws_lambda_function" "notifier_lambda" {
 
   environment {
     variables = {
-      TELEGRAM_BOT_TOKEN_PARAM = data.aws_ssm_parameter.telegram_bot_token.name
-      TELEGRAM_CHAT_ID_PARAM   = data.aws_ssm_parameter.telegram_chat_id.name
+      TELEGRAM_BOT_TOKEN_PARAM          = data.aws_ssm_parameter.telegram_bot_token.name
+      TELEGRAM_PRIMARY_CHAT_ID_PARAM    = data.aws_ssm_parameter.telegram_primary_chat_id.name
+      TELEGRAM_SECONDARY_CHAT_ID_PARAM  = data.aws_ssm_parameter.telegram_secondary_chat_id.name
       SPOTIFY_CLIENT_ID_PARAM  = data.aws_ssm_parameter.spotify_client_id.name
       SPOTIFY_REDIRECT_URI     = "${trimsuffix(aws_apigatewayv2_stage.default.invoke_url, "/")}/callback"
     }
@@ -70,7 +71,8 @@ resource "aws_iam_role_policy" "notifier_lambda_ssm" {
         Action = ["ssm:GetParameter"]
         Resource = [
           data.aws_ssm_parameter.telegram_bot_token.arn,
-          data.aws_ssm_parameter.telegram_chat_id.arn,
+          data.aws_ssm_parameter.telegram_primary_chat_id.arn,
+          data.aws_ssm_parameter.telegram_secondary_chat_id.arn,
           data.aws_ssm_parameter.spotify_client_id.arn,
         ]
       },

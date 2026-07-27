@@ -499,8 +499,13 @@ dependencies = [
 name = "callback-lambda"
 version = "0.1.0"
 dependencies = [
+ "aws-config",
+ "aws-sdk-ssm",
  "lambda_http",
  "lambda_runtime",
+ "reqwest",
+ "serde",
+ "serde_json",
  "tokio",
  "tracing",
  "tracing-subscriber",
