@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -46,10 +46,11 @@ jobs:
         run: cargo lambda build --release --arm64
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: notifier-lambda
-          path: ./target/lambda/notifier-lambda/
+          path: target/lambda/notifier-lambda/
+          if-no-files-found: error
           retention-days: 1
 
   build-callback:
@@ -62,7 +63,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -90,10 +91,11 @@ jobs:
         run: cargo lambda build --release --arm64
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: callback-lambda
-          path: ./target/lambda/callback-lambda/
+          path: target/lambda/callback-lambda/
+          if-no-files-found: error
           retention-days: 1
 
   plan:
@@ -107,16 +109,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download Notifier Function Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: notifier-lambda
           path: ./notifier-lambda
 
       - name: Download Callback Function Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: callback-lambda
           path: ./callback-lambda
@@ -127,7 +129,7 @@ jobs:
           terraform_version: "~1.13"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           mask-aws-account-id: true
@@ -161,16 +163,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download Notifier Function Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: notifier-lambda
           path: ./notifier-lambda
 
       - name: Download Callback Function Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: callback-lambda
           path: ./callback-lambda
@@ -181,7 +183,7 @@ jobs:
           terraform_version: "~1.13"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           mask-aws-account-id: true
