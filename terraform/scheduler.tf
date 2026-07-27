@@ -43,7 +43,8 @@ resource "aws_scheduler_schedule" "notifier_primary" {
     mode = "OFF"
   }
 
-  schedule_expression = "rate(150 days)"
+  schedule_expression          = local.notifier_schedule_expression
+  schedule_expression_timezone = local.notifier_schedule_expression_timezone
 
   target {
     arn      = aws_lambda_function.notifier_lambda.arn
@@ -60,7 +61,8 @@ resource "aws_scheduler_schedule" "notifier_secondary" {
     mode = "OFF"
   }
 
-  schedule_expression = "rate(150 days)"
+  schedule_expression          = local.notifier_schedule_expression
+  schedule_expression_timezone = local.notifier_schedule_expression_timezone
 
   target {
     arn      = aws_lambda_function.notifier_lambda.arn

@@ -33,6 +33,10 @@ provider "aws" {
 
 locals {
   app_name = "spoti-mate"
+
+  # 27th at midday on Mar, Jun, Sep, and Dec.
+  notifier_schedule_expression          = "cron(0 12 27 3,6,9,12 ? *)"
+  notifier_schedule_expression_timezone = "Europe/Warsaw"
 }
 
 data "aws_region" "current" {}

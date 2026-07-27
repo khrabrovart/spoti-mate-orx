@@ -91,11 +91,14 @@ fn missing_code_response(
 }
 
 fn success_response() -> Result<Response<Body>, Error> {
-    text_response(200, "Spotify authorization complete successfully.")
+    text_response(
+        200,
+        "✅ Spotify authorization completed successfully. You can close this window.",
+    )
 }
 
 fn error_response(message: &str) -> Result<Response<Body>, Error> {
-    text_response(400, message)
+    text_response(400, &format!("❌ {message}"))
 }
 
 async fn get_parameter(ssm: &SsmClient, name: &str) -> Result<String, Error> {

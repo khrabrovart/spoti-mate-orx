@@ -26,6 +26,8 @@ pub async fn handle(event: LambdaEvent<Value>) -> Result<(), Error> {
         .and_then(Value::as_str)
         .ok_or_else(|| Error::from("missing or invalid 'value' in event payload"))?;
 
+    info!(value, "starting notifier");
+
     let (chat_id_param, state) = match value {
         "primary" => ("TELEGRAM_PRIMARY_CHAT_ID_PARAM", "primary"),
         "secondary" => ("TELEGRAM_SECONDARY_CHAT_ID_PARAM", "secondary"),
