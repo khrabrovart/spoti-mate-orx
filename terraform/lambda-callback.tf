@@ -18,11 +18,11 @@ resource "aws_lambda_function" "callback_lambda" {
 
   environment {
     variables = {
-      SPOTIFY_CLIENT_ID_PARAM                 = data.aws_ssm_parameter.spotify_client_id.name
-      SPOTIFY_CLIENT_SECRET_PARAM             = data.aws_ssm_parameter.spotify_client_secret.name
-      SPOTIFY_PRIMARY_REFRESH_TOKEN_PARAM     = data.aws_ssm_parameter.spotify_primary_refresh_token.name
-      SPOTIFY_SECONDARY_REFRESH_TOKEN_PARAM   = data.aws_ssm_parameter.spotify_secondary_refresh_token.name
-      SPOTIFY_REDIRECT_URI                    = "${trimsuffix(aws_apigatewayv2_stage.default.invoke_url, "/")}/callback"
+      SPOTIFY_CLIENT_ID_PARAM               = data.aws_ssm_parameter.spotify_client_id.name
+      SPOTIFY_CLIENT_SECRET_PARAM           = data.aws_ssm_parameter.spotify_client_secret.name
+      SPOTIFY_PRIMARY_REFRESH_TOKEN_PARAM   = data.aws_ssm_parameter.spotify_primary_refresh_token.name
+      SPOTIFY_SECONDARY_REFRESH_TOKEN_PARAM = data.aws_ssm_parameter.spotify_secondary_refresh_token.name
+      SPOTIFY_REDIRECT_URI                  = "${trimsuffix(aws_apigatewayv2_stage.default.invoke_url, "/")}/callback"
     }
   }
 
@@ -79,8 +79,8 @@ resource "aws_iam_role_policy" "callback_lambda_ssm" {
         ]
       },
       {
-        Effect = "Allow"
-        Action = ["kms:Decrypt", "kms:Encrypt"]
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt", "kms:Encrypt"]
         Resource = [data.aws_kms_key.ssm.arn]
       }
     ]
