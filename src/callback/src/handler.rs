@@ -93,7 +93,7 @@ fn missing_code_response(
 fn success_response() -> Result<Response<Body>, Error> {
     text_response(
         200,
-        &format!("Spotify authorization complete successfully."),
+        "Spotify authorization complete successfully.",
     )
 }
 
