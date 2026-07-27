@@ -51,7 +51,7 @@ resource "aws_ssm_parameter" "spotify_client_secret" {
 resource "aws_ssm_parameter" "spotify_primary_refresh_token" {
   name  = "/${local.app_name}/spotify/primary-refresh-token"
   type  = "SecureString"
-  value = "pending-oauth"
+  value = "PLACEHOLDER"
 
   lifecycle {
     ignore_changes = [value]
@@ -61,7 +61,7 @@ resource "aws_ssm_parameter" "spotify_primary_refresh_token" {
 resource "aws_ssm_parameter" "spotify_secondary_refresh_token" {
   name  = "/${local.app_name}/spotify/secondary-refresh-token"
   type  = "SecureString"
-  value = "pending-oauth"
+  value = "PLACEHOLDER"
 
   lifecycle {
     ignore_changes = [value]

@@ -12,18 +12,31 @@ pub async fn handle(request: Request) -> Result<Response<Body>, Error> {
 
     let code = match query_params.first("code") {
         Some(code) => code,
-        None => return text_response(400, "missing 'code' query parameter"),
+        None => {
+            return missing_code_response(
+                query_params.first("error"),
+                query_params.first("error_description"),
+            )
+        }
     };
 
     let state = match query_params.first("state") {
         Some(state) => state,
-        None => return text_response(400, "missing 'state' query parameter"),
+        None => {
+            return error_response(
+                "Spotify authorization failed. The callback URL is missing the state parameter.",
+            )
+        }
     };
 
     let refresh_token_param = match state {
         "primary" => env::var("SPOTIFY_PRIMARY_REFRESH_TOKEN_PARAM")?,
         "secondary" => env::var("SPOTIFY_SECONDARY_REFRESH_TOKEN_PARAM")?,
-        other => return text_response(400, &format!("invalid 'state' query parameter: {other}")),
+        other => {
+            return error_response(&format!(
+                "Spotify authorization failed. The account identifier in the link is \"{other}\"."
+            ))
+        }
     };
 
     let config = aws_config::load_defaults(aws_config::BehaviorVersion::latest()).await;
@@ -45,7 +58,49 @@ pub async fn handle(request: Request) -> Result<Response<Body>, Error> {
         .await?;
 
     info!(state, "refresh token saved to SSM");
-    text_response(200, &format!("Refresh token saved for {state}"))
+    success_response()
+}
+
+fn missing_code_response(
+    spotify_error: Option<&str>,
+    spotify_error_description: Option<&str>,
+) -> Result<Response<Body>, Error> {
+    if let Some(error) = spotify_error {
+
+        let message = match (error, spotify_error_description) {
+            ("access_denied", _) => {
+                "Spotify authorization failed. Access was declined on the Spotify permission screen."
+            }
+            (_, Some(description)) => {
+                return error_response(&format!(
+                    "Spotify authorization failed. Spotify returned error \"{error}\": {description}"
+                ));
+            }
+            _ => {
+                return error_response(&format!(
+                    "Spotify authorization failed. Spotify returned error \"{error}\"."
+                ));
+            }
+        };
+
+        return error_response(message);
+    }
+
+    error_response(
+        "Spotify authorization failed. Spotify did not return an authorization code. \
+         Please complete the authorization process.",
+    )
+}
+
+fn success_response() -> Result<Response<Body>, Error> {
+    text_response(
+        200,
+        &format!("Spotify authorization complete successfully."),
+    )
+}
+
+fn error_response(message: &str) -> Result<Response<Body>, Error> {
+    text_response(400, message)
 }
 
 async fn get_parameter(ssm: &SsmClient, name: &str) -> Result<String, Error> {
