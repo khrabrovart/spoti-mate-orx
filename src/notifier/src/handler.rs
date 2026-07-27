@@ -7,7 +7,16 @@ use tracing::{error, info};
 use url::Url;
 
 const SPOTIFY_AUTHORIZE_URL: &str = "https://accounts.spotify.com/authorize";
-const SPOTIFY_SCOPES: &str = "user-read-playback-state user-modify-playback-state user-read-currently-playing";
+const SPOTIFY_SCOPES: &[&str] = &[
+    "playlist-modify-private",
+    "playlist-modify-public",
+    "playlist-read-collaborative",
+    "playlist-read-private",
+    "user-follow-modify",
+    "user-follow-read",
+    "user-library-modify",
+    "user-library-read",
+];
 const TELEGRAM_API_BASE: &str = "https://api.telegram.org";
 
 pub async fn handle(event: LambdaEvent<Value>) -> Result<(), Error> {
@@ -63,7 +72,7 @@ fn build_authorize_url(
     client_id: &str,
     redirect_uri: &str,
     state: &str,
-    scope: &str,
+    scopes: &[&str],
 ) -> Result<String, Error> {
     let mut url = Url::parse(SPOTIFY_AUTHORIZE_URL)?;
     url.query_pairs_mut()
@@ -71,7 +80,7 @@ fn build_authorize_url(
         .append_pair("response_type", "code")
         .append_pair("redirect_uri", redirect_uri)
         .append_pair("state", state)
-        .append_pair("scope", scope);
+        .append_pair("scope", &scopes.join(" "));
 
     Ok(url.into())
 }

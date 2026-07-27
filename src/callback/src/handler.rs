@@ -33,13 +33,8 @@ pub async fn handle(request: Request) -> Result<Response<Body>, Error> {
     let client_secret = get_parameter(&ssm, &env::var("SPOTIFY_CLIENT_SECRET_PARAM")?).await?;
     let redirect_uri = env::var("SPOTIFY_REDIRECT_URI")?;
 
-    let refresh_token = exchange_code_for_refresh_token(
-        &client_id,
-        &client_secret,
-        code,
-        &redirect_uri,
-    )
-    .await?;
+    let refresh_token =
+        exchange_code_for_refresh_token(&client_id, &client_secret, code, &redirect_uri).await?;
 
     ssm.put_parameter()
         .name(&refresh_token_param)
