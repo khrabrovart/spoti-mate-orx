@@ -20,14 +20,13 @@ pub async fn handle(request: Request) -> Result<Response<Body>, Error> {
         }
     };
 
-    let state = match query_params.first("state") {
-        Some(state) => state,
-        None => {
-            return error_response(
+    let state =
+        match query_params.first("state") {
+            Some(state) => state,
+            None => return error_response(
                 "Spotify authorization failed. The callback URL is missing the state parameter.",
-            )
-        }
-    };
+            ),
+        };
 
     let refresh_token_param = match state {
         "primary" => env::var("SPOTIFY_PRIMARY_REFRESH_TOKEN_PARAM")?,
@@ -66,7 +65,6 @@ fn missing_code_response(
     spotify_error_description: Option<&str>,
 ) -> Result<Response<Body>, Error> {
     if let Some(error) = spotify_error {
-
         let message = match (error, spotify_error_description) {
             ("access_denied", _) => {
                 "Spotify authorization failed. Access was declined on the Spotify permission screen."
