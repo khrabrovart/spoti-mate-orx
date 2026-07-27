@@ -95,9 +95,7 @@ fn build_telegram_message(authorize_url: &str) -> String {
     let authorize_url = escape_html_attr(authorize_url);
 
     format!(
-        "<b>Spotify Authorization</b>\n
-         Authorize the account to keep using SpotiMate, click the link below:\n\n\
-         <a href=\"{authorize_url}\">Authorize Spotify</a>"
+        "🎵 <b>Keep the music playing!</b> 🎵\nAuthorize Spotify access using the link below\n<a href=\"{authorize_url}\">Authorize</a>"
     )
 }
 
