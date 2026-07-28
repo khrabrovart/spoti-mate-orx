@@ -87,16 +87,9 @@ fn build_authorize_url(
     Ok(url.into())
 }
 
-fn escape_html_attr(value: &str) -> String {
-    value.replace('&', "&amp;").replace('"', "&quot;")
-}
-
-fn build_telegram_message(authorize_url: &str) -> String {
-    let authorize_url = escape_html_attr(authorize_url);
-
-    format!(
-        "🎵 <b>Keep the music playing!</b> 🎵\nAuthorize Spotify access using the link below\n<a href=\"{authorize_url}\">Authorize</a>"
-    )
+fn build_telegram_message() -> String {
+    "🎵 <b>Keep the music playing!</b> 🎵\nPlease authorize Spotify access using the button below"
+        .to_owned()
 }
 
 async fn send_telegram_message(
@@ -106,7 +99,7 @@ async fn send_telegram_message(
 ) -> Result<(), Error> {
     let client = reqwest::Client::new();
     let send_message_url = format!("{TELEGRAM_API_BASE}/bot{bot_token}/sendMessage");
-    let text = build_telegram_message(authorize_url);
+    let text = build_telegram_message();
 
     let response = client
         .post(&send_message_url)
@@ -114,6 +107,12 @@ async fn send_telegram_message(
             "chat_id": chat_id,
             "text": text,
             "parse_mode": "HTML",
+            "reply_markup": {
+                "inline_keyboard": [[{
+                    "text": "Authorize",
+                    "url": authorize_url
+                }]]
+            }
         }))
         .send()
         .await?;
