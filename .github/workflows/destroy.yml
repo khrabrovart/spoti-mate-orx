@@ -7,6 +7,9 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  TF_VAR_aws_assume_role_arn: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
+
 jobs:
   destroy:
     name: "Terraform Destroy"
