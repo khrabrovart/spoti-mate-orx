@@ -13,7 +13,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "arturkhrabrov-tfstate"
+    bucket  = "kha-org-state"
     key     = "spoti-mate-orx/terraform.tfstate"
     region  = "us-east-1"
     encrypt = true
