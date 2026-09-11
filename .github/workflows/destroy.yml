@@ -37,7 +37,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Terraform Init
-        run: terraform init -reconfigure
+        run: terraform init
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -input=false -refresh=false
